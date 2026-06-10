@@ -3,22 +3,18 @@
 @section('title', 'Tinjau Draf Pengadaan')
 
 @section('header_title', 'Tinjau Draf Pengadaan ' . $draft->year)
-@section('header_subtitle', 'Diusulkan oleh: ' . $draft->creator->name)
 
 @section('content')
-<div class="mb-4 d-flex justify-between align-center">
-    <a href="{{ route('kaprodi.review.index') }}" class="btn btn-secondary btn-sm">
-        &larr; Kembali ke Daftar
+<div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <a href="{{ route('kaprodi.review.index') }}" class="btn btn-white btn-sm d-inline-flex align-items-center gap-1">
+        <i class="ti ti-arrow-left"></i> Kembali ke Daftar
     </a>
     
     @if($draft->status == 'pending_review' && $items->where('status', 'pending')->count() == 0)
         <form action="{{ route('kaprodi.review.finalize', $draft->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin memfinalisasi pengadaan ini? Status pengadaan akan menjadi final dan dikirim ke staf administrasi.')">
             @csrf
-            <button type="submit" class="btn btn-success">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle;margin-right:6px;">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                Finalisasikan & Kunci Pengadaan
+            <button type="submit" class="btn btn-success text-white d-inline-flex align-items-center gap-1">
+                <i class="ti ti-lock"></i> Finalisasikan & Kunci Pengadaan
             </button>
         </form>
     @elseif($draft->status == 'pending_review')
@@ -26,44 +22,52 @@
             Finalisasikan & Kunci (Tinjauan Belum Selesai)
         </button>
     @else
-        <span class="badge badge-success" style="padding:10px 16px;">Pengadaan Telah Difinalisasi</span>
+        <span class="badge text-success-emphasis bg-success-subtle py-2 px-3">Pengadaan Telah Difinalisasi</span>
     @endif
 </div>
 
-<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 24px;">
-    <div class="stat-card glass-panel card-primary">
-        <div class="stat-info">
-            <span class="stat-value">{{ $items->count() }}</span>
-            <span class="stat-label">Total Barang</span>
+<div class="row g-6 mb-6">
+    <div class="col-md-3 col-sm-6 col-12">
+        <div class="card card-lg shadow-sm">
+            <div class="card-body">
+                <div class="text-secondary fw-semibold mb-2">Total Barang</div>
+                <div class="fs-3 fw-bold text-dark">{{ $items->count() }}</div>
+            </div>
         </div>
     </div>
-    <div class="stat-card glass-panel card-success">
-        <div class="stat-info">
-            <span class="stat-value">{{ $items->where('status', 'approved')->count() }}</span>
-            <span class="stat-label">Barang Disetujui</span>
+    <div class="col-md-3 col-sm-6 col-12">
+        <div class="card card-lg shadow-sm">
+            <div class="card-body">
+                <div class="text-secondary fw-semibold mb-2">Barang Disetujui</div>
+                <div class="fs-3 fw-bold text-success">{{ $items->where('status', 'approved')->count() }}</div>
+            </div>
         </div>
     </div>
-    <div class="stat-card glass-panel card-danger">
-        <div class="stat-info">
-            <span class="stat-value">{{ $items->where('status', 'rejected')->count() }}</span>
-            <span class="stat-label">Barang Ditolak</span>
+    <div class="col-md-3 col-sm-6 col-12">
+        <div class="card card-lg shadow-sm">
+            <div class="card-body">
+                <div class="text-secondary fw-semibold mb-2">Barang Ditolak</div>
+                <div class="fs-3 fw-bold text-danger">{{ $items->where('status', 'rejected')->count() }}</div>
+            </div>
         </div>
     </div>
-    <div class="stat-card glass-panel card-warning">
-        <div class="stat-info">
-            <span class="stat-value">{{ $items->where('status', 'pending')->count() }}</span>
-            <span class="stat-label">Menunggu Tinjauan</span>
+    <div class="col-md-3 col-sm-6 col-12">
+        <div class="card card-lg shadow-sm">
+            <div class="card-body">
+                <div class="text-secondary fw-semibold mb-2">Menunggu Tinjauan</div>
+                <div class="fs-3 fw-bold text-warning">{{ $items->where('status', 'pending')->count() }}</div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="content-panel glass-panel">
-    <div class="panel-header">
-        <h3 class="panel-title">Barang yang Diajukan</h3>
+<div class="card card-lg shadow-sm">
+    <div class="card-header border-bottom-0">
+        <h5 class="mb-0">Barang yang Diajukan</h5>
     </div>
 
     <div class="table-responsive">
-        <table class="table">
+        <table class="table text-nowrap mb-0 table-centered table-hover">
             <thead>
                 <tr>
                     <th>Nama Barang</th>
@@ -84,16 +88,18 @@
                     <tr>
                         <td><strong>{{ $item->name }}</strong></td>
                         <td>
-                            <span class="badge {{ $item->type == 'asset' ? 'badge-info' : 'badge-success' }}">
-                                {{ $item->type == 'asset' ? 'Aset/Inventaris' : 'BHP' }}
-                            </span>
+                            @if($item->type == 'asset')
+                                <span class="badge text-info-emphasis bg-info-subtle">Aset</span>
+                            @else
+                                <span class="badge text-success-emphasis bg-success-subtle">BHP</span>
+                            @endif
                         </td>
                         <td>Rp {{ number_format($item->price, 0, ',', '.') }}</td>
                         <td>{{ $item->quantity }}</td>
                         <td>Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</td>
                         <td>
                             @if($item->purchase_link)
-                                <a href="{{ $item->purchase_link }}" target="_blank" class="btn btn-secondary btn-xs" style="color: var(--color-info);">
+                                <a href="{{ $item->purchase_link }}" target="_blank" class="btn btn-white btn-sm">
                                     Buka Link
                                 </a>
                             @else
@@ -102,7 +108,7 @@
                         </td>
                         <td>
                             @if($item->replacedAsset)
-                                <span style="font-size:0.85rem; color:var(--text-secondary);">
+                                <span class="small text-secondary">
                                     {{ $item->replacedAsset->name }} <br>
                                     <code>({{ $item->replacedAsset->code }})</code>
                                 </span>
@@ -112,25 +118,25 @@
                         </td>
                         <td>
                             @if($item->status == 'pending')
-                                <span class="badge badge-warning">Pending</span>
+                                <span class="badge text-warning-emphasis bg-warning-subtle">Pending</span>
                             @elseif($item->status == 'approved')
-                                <span class="badge badge-success">Disetujui</span>
+                                <span class="badge text-success-emphasis bg-success-subtle">Disetujui</span>
                             @else
-                                <span class="badge badge-danger">Ditolak</span>
+                                <span class="badge text-danger-emphasis bg-danger-subtle">Ditolak</span>
                             @endif
                         </td>
                         @if($draft->status == 'pending_review')
-                            <td style="text-align: center;">
-                                <div class="d-flex gap-2" style="justify-content: center;">
+                            <td>
+                                <div class="d-flex gap-2 justify-content-center">
                                     <form action="{{ route('kaprodi.review.items.approve', [$draft->id, $item->id]) }}" method="POST">
                                         @csrf
-                                        <button type="submit" class="btn btn-success btn-xs" {{ $item->status == 'approved' ? 'disabled' : '' }}>
+                                        <button type="submit" class="btn btn-success btn-sm text-white" {{ $item->status == 'approved' ? 'disabled' : '' }}>
                                             Setujui
                                         </button>
                                     </form>
                                     <form action="{{ route('kaprodi.review.items.reject', [$draft->id, $item->id]) }}" method="POST">
                                         @csrf
-                                        <button type="submit" class="btn btn-danger btn-xs" {{ $item->status == 'rejected' ? 'disabled' : '' }}>
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" {{ $item->status == 'rejected' ? 'disabled' : '' }}>
                                             Tolak
                                         </button>
                                     </form>
