@@ -3,76 +3,77 @@
 @section('title', 'Catat Maintenance')
 
 @section('header_title', 'Catat Pemeliharaan Aset')
-@section('header_subtitle', 'Masukkan detail perbaikan aset dan penggunaan BHP.')
 
 @section('content')
 <div class="mb-4">
-    <a href="{{ route('staf_lab.maintenance.index') }}" class="btn btn-secondary btn-sm">
-        &larr; Kembali ke Daftar
+    <a href="{{ route('staf_lab.maintenance.index') }}" class="btn btn-white btn-sm d-inline-flex align-items-center gap-1">
+        <i class="ti ti-arrow-left"></i> Kembali ke Daftar
     </a>
 </div>
 
-<div class="content-panel glass-panel" style="max-width: 800px; margin: 0 auto;">
-    <div class="panel-header">
-        <h3 class="panel-title">Form Pemeliharaan Aset</h3>
+<div class="card card-lg shadow-sm" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header border-bottom-0">
+        <h5 class="mb-0">Form Pemeliharaan Aset</h5>
     </div>
 
-    <form action="{{ route('staf_lab.maintenance.store') }}" method="POST">
-        @csrf
+    <div class="card-body">
+        <form action="{{ route('staf_lab.maintenance.store') }}" method="POST">
+            @csrf
 
-        <div class="form-group">
-            <label class="form-label">Pilih Aset / Inventaris</label>
-            <select name="asset_id" id="asset_select" class="form-control" required onchange="updateCurrentStatus()">
-                <option value="">-- Pilih Aset --</option>
-                @foreach($assets as $asset)
-                    <option value="{{ $asset->id }}" data-status="{{ $asset->status }}">
-                        {{ $asset->name }} [{{ $asset->code ?? 'BELUM DILABEL' }}] (Kondisi saat ini: {{ $asset->status }})
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="grid-2" style="margin-bottom:0;">
-            <div class="form-group">
-                <label class="form-label">Tanggal Pemeliharaan</label>
-                <input type="date" name="maintenance_date" class="form-control" required value="{{ date('Y-m-d') }}">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Kondisi Setelah Maintenance</label>
-                <select name="status_after" class="form-control" required>
-                    <option value="baik">Baik / Normal</option>
-                    <option value="rusak">Rusak</option>
-                    <option value="maintenance">Dalam Pemeliharaan (Maintenance)</option>
-                    <option value="diarsipkan">Diarsipkan / Dihapus (Penghapusan Aset)</option>
+            <div class="mb-3">
+                <label class="form-label">Pilih Aset / Inventaris</label>
+                <select name="asset_id" id="asset_select" class="form-select" required onchange="updateCurrentStatus()">
+                    <option value="">-- Pilih Aset --</option>
+                    @foreach($assets as $asset)
+                        <option value="{{ $asset->id }}" data-status="{{ $asset->status }}">
+                            {{ $asset->name }} [{{ $asset->code ?? 'BELUM DILABEL' }}] (Kondisi saat ini: {{ $asset->status }})
+                        </option>
+                    @endforeach
                 </select>
             </div>
-        </div>
 
-        <div class="form-group">
-            <label class="form-label">Deskripsi Pekerjaan Pemeliharaan</label>
-            <textarea name="description" class="form-control" rows="4" required placeholder="Jelaskan detail perbaikan, misal: 'Membersihkan lensa mikroskop, merapikan kabel UTP di server, dll.'"></textarea>
-        </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6 col-12">
+                    <label class="form-label">Tanggal Pemeliharaan</label>
+                    <input type="date" name="maintenance_date" class="form-control" required value="{{ date('Y-m-d') }}">
+                </div>
 
-        <!-- BHP Usage Section -->
-        <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-glass);">
-            <div class="panel-header" style="margin-bottom: 16px;">
-                <h4 style="color:#ffffff; font-size:1.05rem;">BHP yang Digunakan (Opsional)</h4>
-                <button type="button" class="btn btn-secondary btn-xs" onclick="addBhpRow()">
-                    + Tambah BHP
-                </button>
+                <div class="col-md-6 col-12">
+                    <label class="form-label">Kondisi Setelah Maintenance</label>
+                    <select name="status_after" class="form-select" required>
+                        <option value="baik">Baik / Normal</option>
+                        <option value="rusak">Rusak</option>
+                        <option value="maintenance">Dalam Pemeliharaan (Maintenance)</option>
+                        <option value="diarsipkan">Diarsipkan / Dihapus (Penghapusan Aset)</option>
+                    </select>
+                </div>
             </div>
-            
-            <div id="bhp_usages_container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-                <!-- Rows injected dynamically via JS -->
-            </div>
-        </div>
 
-        <div class="d-flex justify-end gap-2 mt-4" style="justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--border-glass);">
-            <a href="{{ route('staf_lab.maintenance.index') }}" class="btn btn-secondary">Batal</a>
-            <button type="submit" class="btn btn-primary">Simpan Log Pemeliharaan</button>
-        </div>
-    </form>
+            <div class="mb-3">
+                <label class="form-label">Deskripsi Pekerjaan Pemeliharaan</label>
+                <textarea name="description" class="form-control" rows="4" required placeholder="Jelaskan detail perbaikan, misal: 'Membersihkan lensa mikroskop, merapikan kabel UTP di server, dll.'"></textarea>
+            </div>
+
+            <!-- BHP Usage Section -->
+            <div class="mt-4 pt-4 border-top">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0 fw-bold">BHP yang Digunakan (Opsional)</h6>
+                    <button type="button" class="btn btn-white btn-sm d-inline-flex align-items-center gap-1" onclick="addBhpRow()">
+                        <i class="ti ti-plus"></i> Tambah BHP
+                    </button>
+                </div>
+                
+                <div id="bhp_usages_container" class="d-flex flex-column gap-2 mb-3">
+                    <!-- Rows injected dynamically via JS -->
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                <a href="{{ route('staf_lab.maintenance.index') }}" class="btn btn-secondary">Batal</a>
+                <button type="submit" class="btn btn-primary">Simpan Log Pemeliharaan</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- BHP Template Data for JS -->
@@ -97,23 +98,23 @@
         }
 
         const row = document.createElement('div');
-        row.className = 'd-flex gap-3 align-center';
+        row.className = 'row g-3 align-items-center mb-2';
         row.id = `bhp_row_${bhpIndex}`;
         row.innerHTML = `
-            <div style="flex-grow: 2;">
-                <select name="bhp_usages[${bhpIndex}][bhp_id]" class="form-control" required onchange="handleBhpChange(${bhpIndex})">
+            <div class="col-md-6 col-12">
+                <select name="bhp_usages[${bhpIndex}][bhp_id]" class="form-select" required onchange="handleBhpChange(${bhpIndex})">
                     <option value="">-- Pilih BHP --</option>
                     ${optionsHtml}
                 </select>
             </div>
-            <div style="width: 120px;">
+            <div class="col-md-2 col-4">
                 <input type="number" name="bhp_usages[${bhpIndex}][quantity]" id="bhp_qty_${bhpIndex}" class="form-control" required min="1" placeholder="Qty">
             </div>
-            <div style="width: 80px; color: var(--text-secondary); font-size: 0.85rem;" id="bhp_unit_${bhpIndex}">
+            <div class="col-md-2 col-4 text-secondary small" id="bhp_unit_${bhpIndex}">
                 -
             </div>
-            <div>
-                <button type="button" class="btn btn-danger btn-xs" onclick="removeBhpRow(${bhpIndex})">
+            <div class="col-md-2 col-4 text-end">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeBhpRow(${bhpIndex})">
                     Hapus
                 </button>
             </div>
@@ -128,7 +129,7 @@
     }
 
     function handleBhpChange(index) {
-        const select = document.querySelector(`select[name="bhp_usages[${index}][bhp_id]"]`);
+        const select = document.querySelector(`select[name="bhp_usages[index][bhp_id]"]`.replace('index', index));
         const qtyInput = document.getElementById(`bhp_qty_${index}`);
         const unitLabel = document.getElementById(`bhp_unit_${index}`);
         
@@ -154,7 +155,6 @@
         const selectedOption = select.options[select.selectedIndex];
         const currentStatus = selectedOption.getAttribute('data-status');
         
-        // Optionally set status_after to current status as default
         const statusAfterSelect = document.querySelector('select[name="status_after"]');
         statusAfterSelect.value = currentStatus;
     }

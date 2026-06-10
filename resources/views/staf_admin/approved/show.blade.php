@@ -3,22 +3,21 @@
 @section('title', 'Catat Penerimaan Barang')
 
 @section('header_title', 'Penerimaan Pengadaan ' . $draft->year)
-@section('header_subtitle', 'Catat kedatangan barang secara berkala/parsial.')
 
 @section('content')
 <div class="mb-4">
-    <a href="{{ route('staf_admin.approved.index') }}" class="btn btn-secondary btn-sm">
-        &larr; Kembali ke Daftar
+    <a href="{{ route('staf_admin.approved.index') }}" class="btn btn-white btn-sm d-inline-flex align-items-center gap-1">
+        <i class="ti ti-arrow-left"></i> Kembali ke Daftar
     </a>
 </div>
 
-<div class="content-panel glass-panel">
-    <div class="panel-header">
-        <h3 class="panel-title">Barang Disetujui (Siap Diterima)</h3>
+<div class="card card-lg shadow-sm">
+    <div class="card-header border-bottom-0">
+        <h5 class="mb-0">Barang Disetujui (Siap Diterima)</h5>
     </div>
 
     <div class="table-responsive">
-        <table class="table">
+        <table class="table text-nowrap mb-0 table-centered table-hover">
             <thead>
                 <tr>
                     <th>Nama Barang</th>
@@ -40,36 +39,38 @@
                             <strong>{{ $item->name }}</strong>
                             @if($item->replacedAsset)
                                 <br>
-                                <span style="font-size:0.75rem; color:var(--color-warning);">
+                                <span class="small text-warning">
                                     Menggantikan: {{ $item->replacedAsset->name }} ({{ $item->replacedAsset->code }})
                                 </span>
                             @endif
                         </td>
                         <td>
-                            <span class="badge {{ $item->type == 'asset' ? 'badge-info' : 'badge-success' }}">
-                                {{ $item->type == 'asset' ? 'Aset' : 'BHP' }}
-                            </span>
+                            @if($item->type == 'asset')
+                                <span class="badge text-info-emphasis bg-info-subtle">Aset</span>
+                            @else
+                                <span class="badge text-success-emphasis bg-success-subtle">BHP</span>
+                            @endif
                         </td>
                         <td>Rp {{ number_format($item->price, 0, ',', '.') }}</td>
                         <td>{{ $item->quantity }}</td>
                         <td>
-                            <span class="badge badge-success">{{ $item->received_quantity }}</span>
+                            <span class="badge text-success-emphasis bg-success-subtle">{{ $item->received_quantity }}</span>
                         </td>
                         <td>
                             @if($remaining > 0)
-                                <span class="badge badge-warning">{{ $remaining }}</span>
+                                <span class="badge text-warning-emphasis bg-warning-subtle">{{ $remaining }}</span>
                             @else
-                                <span class="badge badge-success">Lengkap</span>
+                                <span class="badge text-success-emphasis bg-success-subtle">Lengkap</span>
                             @endif
                         </td>
                         <td>
                             @if($remaining > 0)
-                                <button class="btn btn-primary btn-xs" onclick="openReceiptModal({{ json_encode($item) }})">
+                                <button class="btn btn-primary btn-sm" onclick="openReceiptModal({{ json_encode($item) }})">
                                     Catat Penerimaan
                                 </button>
                             @else
-                                <span style="color: var(--color-success); font-size: 0.85rem; font-weight:700;">
-                                    ✓ Selesai
+                                <span class="text-success small fw-bold">
+                                    <i class="ti ti-check"></i> Selesai
                                 </span>
                             @endif
                         </td>
@@ -81,37 +82,40 @@
 </div>
 
 <!-- Receipt Modal -->
-<div id="receiptModal" class="modal-overlay" style="display: none;">
-    <div class="modal-content glass-panel">
-        <div class="modal-header">
-            <h3 class="panel-title">Pencatatan Penerimaan Barang</h3>
-            <button class="modal-close" onclick="closeReceiptModal()">&times;</button>
+<div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold" id="receiptModalLabel">Pencatatan Penerimaan Barang</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="receiptForm" method="POST">
+                @csrf
+                <div class="modal-body d-flex flex-column gap-3">
+                    <div>
+                        <label class="form-label">Nama Barang</label>
+                        <input type="text" id="modal_item_name" class="form-control bg-light" readonly>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Tanggal Penerimaan</label>
+                        <input type="date" name="received_date" class="form-control" required value="{{ date('Y-m-d') }}">
+                    </div>
+
+                    <div>
+                        <label class="form-label">Jumlah yang Datang</label>
+                        <input type="number" name="quantity_received" id="modal_quantity_received" class="form-control" required min="1" placeholder="Masukkan jumlah barang">
+                        <p class="text-secondary small mt-1" id="modal_remaining_info">
+                            *Maksimal: 
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Penerimaan</button>
+                </div>
+            </form>
         </div>
-        <form id="receiptForm" method="POST">
-            @csrf
-            <div class="form-group">
-                <label class="form-label">Nama Barang</label>
-                <input type="text" id="modal_item_name" class="form-control" readonly style="background: rgba(255,255,255,0.05); color: var(--text-secondary);">
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Tanggal Penerimaan</label>
-                <input type="date" name="received_date" class="form-control" required value="{{ date('Y-m-d') }}">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Jumlah yang Datang</label>
-                <input type="number" name="quantity_received" id="modal_quantity_received" class="form-control" required min="1" placeholder="Masukkan jumlah barang">
-                <p style="color:var(--text-secondary); font-size:0.75rem; margin-top:4px;" id="modal_remaining_info">
-                    *Maksimal: 
-                </p>
-            </div>
-
-            <div class="d-flex justify-end gap-2 mt-4" style="justify-content: flex-end;">
-                <button type="button" class="btn btn-secondary" onclick="closeReceiptModal()">Batal</button>
-                <button type="submit" class="btn btn-primary">Simpan Penerimaan</button>
-            </div>
-        </form>
     </div>
 </div>
 @endsection
@@ -125,11 +129,10 @@
         document.getElementById('modal_quantity_received').max = remaining;
         document.getElementById('modal_quantity_received').placeholder = "Masukkan jumlah (1 - " + remaining + ")";
         document.getElementById('modal_remaining_info').innerText = "*Jumlah barang yang belum datang: " + remaining + " unit.";
-        document.getElementById('receiptModal').style.display = 'flex';
-    }
-
-    function closeReceiptModal() {
-        document.getElementById('receiptModal').style.display = 'none';
+        
+        var receiptModalEl = document.getElementById('receiptModal');
+        var modalInstance = new bootstrap.Modal(receiptModalEl);
+        modalInstance.show();
     }
 </script>
 @endsection
